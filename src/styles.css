@@ -1,0 +1,26 @@
+/* You can add global styles to this file, and also import other style files */
+html {
+    font-size: 15px;
+}
+
+input, textarea, select, button {
+    font-size: 15px;
+}
+
+body {
+    background-color: #fff3e0;
+}
+
+.action-button {
+    background-color: white;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    padding-top: 0.5rem;
+    padding-left: 0.1rem;
+    padding-right: 0.1rem;
+    position: fixed;
+    bottom: 3rem;
+    right: 3rem;
+    cursor: pointer;
+}

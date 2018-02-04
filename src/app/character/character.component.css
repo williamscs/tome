@@ -1,0 +1,15 @@
+div {
+    font-family: 'Pirata One', cursive;
+}
+
+.form-control {
+    font-family: 'Pirata One', cursive;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    border-bottom: 1px solid black;
+}
+
+.class-name {
+    font-size: 3rem;
+}

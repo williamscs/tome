@@ -1,0 +1,25 @@
+<div class="class-name">{{state}}{{ character.class }}{{state}}</div>
+<h2>Character Detail</h2>
+<form [formGroup]="characterForm" novalidate>
+  <div class="form-group">
+    <label class="center-block">Name:
+      <input class="form-control" formControlName="name">
+    </label>
+  </div>
+  <div class="form-group">
+    <label class="center-block">Level:
+      <input class="form-control" formControlName="level">
+    </label>
+  </div>
+  <div class="form-group">
+    <label class="center-block">Experience:
+      <input class="form-control" formControlName="experience">
+    </label>
+  </div>
+</form>
+<p>Form value: {{ characterForm.value | json }}</p>
+<p>Form status: {{ characterForm.status | json }}</p>
+
+<div class="action-button" (click)="onEdit()">
+    <i class="material-icons">edit</i>
+</div>
