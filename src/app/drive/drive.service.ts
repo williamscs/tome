@@ -92,6 +92,8 @@ export class DriveService {
 
       fileId = uploadRequest.result.id;
     }
+
+    return fileId;
   }
 
   async saveFile(metadata, content) {
