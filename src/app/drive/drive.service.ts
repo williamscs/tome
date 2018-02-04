@@ -58,6 +58,7 @@ export class DriveService {
   }
 
   async retrieveSaveData() {
+    let data;
 
     if (this.isSignedIn() && this.gapi.client) {
       const fileId = await this.getFileId();
@@ -67,8 +68,12 @@ export class DriveService {
         'alt': 'media'
       });
 
-      const data = JSON.parse(fileResponse.body);
+      data = JSON.parse(fileResponse.body);
+    } else {
+      data = {};
     }
+
+    return data;
   }
 
   async getFileId() {

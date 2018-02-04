@@ -5,7 +5,7 @@ import { DriveService } from './drive.service';
 describe('DriveService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [DriveService]
+      providers: [DriveService, {provide: 'Window', useValue: {}}]
     });
   });
 
