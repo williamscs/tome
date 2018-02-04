@@ -59,27 +59,8 @@ export class DriveService {
 
   async retrieveSaveData() {
 
-    if (this.gapi.client) {
-      const request = await this.gapi.client.drive.files.list({
-        'spaces': 'appDataFolder',
-        'q': 'name="tome-save.json"'
-      });
-      const files = request.result.files;
-      let fileId;
-      if (files.length === 1) {
-        fileId = request.result.files[0].id;
-      } else if (files.length === 0) {
-        const metadata = {
-          id: null,
-          name: 'tome-save.json',
-          mimeType: 'text/plain',
-          parents: ['appDataFolder'],
-          editable: true
-        };
-        const uploadRequest = await this.saveFile(metadata, '{}');
-
-        fileId = uploadRequest.result.id;
-      }
+    if (this.isSignedIn() && this.gapi.client) {
+      const fileId = await this.getFileId();
 
       const fileResponse = await this.gapi.client.drive.files.get({
         'fileId': fileId,
@@ -87,7 +68,29 @@ export class DriveService {
       });
 
       const data = JSON.parse(fileResponse.body);
-      console.log(data);
+    }
+  }
+
+  async getFileId() {
+    const request = await this.gapi.client.drive.files.list({
+      'spaces': 'appDataFolder',
+      'q': 'name="tome-save.json"'
+    });
+    const files = request.result.files;
+    let fileId;
+    if (files.length === 1) {
+      fileId = request.result.files[0].id;
+    } else if (files.length === 0) {
+      const metadata = {
+        id: null,
+        name: 'tome-save.json',
+        mimeType: 'text/plain',
+        parents: ['appDataFolder'],
+        editable: true
+      };
+      const uploadRequest = await this.saveFile(metadata, '{}');
+
+      fileId = uploadRequest.result.id;
     }
   }
 
