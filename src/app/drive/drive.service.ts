@@ -1,8 +1,9 @@
 import { Inject, Injectable } from '@angular/core';
 import { Subject } from 'rxjs/Subject';
 
-const keys = require('./keyfile.json');
+import {MultiPartBuilder} from './multipart';
 
+const keys = require('./keyfile.json');
 
 declare const gapi: any;
 
@@ -23,7 +24,9 @@ export class DriveService {
 
   // Authorization scopes required by the API; multiple scopes can be
   // included, separated by spaces.
-  readonly SCOPES = 'https://www.googleapis.com/auth/drive.metadata.readonly';
+  readonly SCOPES = 'https://www.googleapis.com/auth/drive.appdata';
+  readonly  DEFAULT_FIELDS = 'id,name,mimeType,spaces';
+
   constructor( @Inject('Window') private window: Window) {
     this.gapi = window['gapi'];
   }
@@ -54,6 +57,76 @@ export class DriveService {
     }
   }
 
+  async retrieveSaveData() {
+
+    if (this.gapi.client) {
+      const request = await this.gapi.client.drive.files.list({
+        'spaces': 'appDataFolder',
+        'q': 'name="tome-save.json"'
+      });
+      const files = request.result.files;
+      let fileId;
+      if (files.length === 1) {
+        fileId = request.result.files[0].id;
+      } else if (files.length === 0) {
+        const metadata = {
+          id: null,
+          name: 'tome-save.json',
+          mimeType: 'text/plain',
+          parents: ['appDataFolder'],
+          editable: true
+        };
+        const uploadRequest = await this.saveFile(metadata, '{}');
+
+        fileId = uploadRequest.result.id;
+      }
+
+      const fileResponse = await this.gapi.client.drive.files.get({
+        'fileId': fileId,
+        'alt': 'media'
+      });
+
+      const data = JSON.parse(fileResponse.body);
+      console.log(data);
+    }
+  }
+
+  async saveFile(metadata, content) {
+      let path;
+      let method;
+
+      if (metadata.id) {
+        path = '/upload/drive/v3/files/' + encodeURIComponent(metadata.id);
+        method = 'PUT';
+      } else {
+        path = '/upload/drive/v3/files';
+        method = 'POST';
+      }
+
+      const multipart = new MultiPartBuilder()
+        .append('application/json', JSON.stringify(metadata))
+        .append(metadata.mimeType, content)
+        .finish();
+      try {
+        const uploadRequest = await gapi.client.request({
+          path: path,
+          method: method,
+          params: {
+            uploadType: 'multipart',
+            supportsTeamDrives: true,
+            fields: this.DEFAULT_FIELDS
+          },
+          headers: { 'Content-Type' : multipart.type },
+          body: multipart.body
+        });
+
+        return uploadRequest;
+      } catch (e) {
+        console.log(e);
+      }
+      return null;
+  }
+
   async signIn() {
     await this.gapi.auth2.getAuthInstance().signIn();
     this.updateSigninStatus(true);
@@ -61,6 +134,9 @@ export class DriveService {
 
   async signOut() {
     await this.gapi.auth2.getAuthInstance().signOut();
+
+    // Clear client data that we currently have.
+    // this.gapi.client = undefined;
     this.updateSigninStatus(false);
   }
 

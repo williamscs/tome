@@ -16,8 +16,6 @@ export class DriveComponent implements OnInit {
   constructor(private driveService: DriveService) {
     this.driveService = driveService;
 
-    this.signedIn = true;
-
     this.driveService.initClient();
   }
 
@@ -25,6 +23,11 @@ export class DriveComponent implements OnInit {
     this.driveService.statusUpdated$.subscribe(status => {
       this.signedIn = status;
     });
+    this.signedIn = this.driveService.isSignedIn();
+  }
+
+  listFiles() {
+    this.driveService.retrieveSaveData();
   }
 
   authorize() {

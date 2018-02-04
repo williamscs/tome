@@ -1,3 +1,4 @@
 <button (click)="authorize()" *ngIf="!signedIn">Authorize Drive</button>
 <button (click)="signOut()" *ngIf="signedIn">Sign Out</button>
+<button (click)="listFiles()">List Files in Console</button>
 <p>Sign in state value: {{ signedIn }}</p>
