@@ -54,12 +54,14 @@ export class DriveService {
     }
   }
 
-  signIn() {
-    gapi.auth2.getAuthInstance().signIn();
+  async signIn() {
+    await this.gapi.auth2.getAuthInstance().signIn();
+    this.updateSigninStatus(true);
   }
 
-  signOut() {
-    gapi.auth2.getAuthInstance().signOut();
+  async signOut() {
+    await this.gapi.auth2.getAuthInstance().signOut();
+    this.updateSigninStatus(false);
   }
 
 }
