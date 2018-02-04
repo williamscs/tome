@@ -2,6 +2,10 @@
   "name": "tome",
   "version": "0.0.0",
   "license": "MIT",
+  "author": {
+    "name": "Chris Williams",
+    "url": "https://github.com/williamscs"
+  },
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
