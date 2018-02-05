@@ -3,7 +3,15 @@ import { Subject } from 'rxjs/Subject';
 
 import {MultiPartBuilder} from './multipart';
 
-const keys = require('./keyfile.json');
+let keys: any;
+
+try {
+  keys = require('./keyfile.json');
+
+} catch (e) {
+  console.log('Unable to load api keys. Saving to Drive will not be an option.')
+}
+
 
 declare const gapi: any;
 
@@ -14,8 +22,8 @@ export class DriveService {
 
   gapi: any;
 
-  readonly CLIENT_ID = keys.clientId;
-  readonly API_KEY = keys.apiKey;
+  readonly CLIENT_ID: string;
+  readonly API_KEY: string;
 
   // Array of API discovery doc URLs for APIs used by the quickstart
   readonly DISCOVERY_DOCS = ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'];
@@ -29,6 +37,11 @@ export class DriveService {
 
   constructor( @Inject('Window') private window: Window) {
     this.gapi = window['gapi'];
+
+    if (keys) {
+      this.CLIENT_ID = keys.clientId;
+      this.API_KEY = keys.apiKey;
+    }
   }
 
   initClient() {
