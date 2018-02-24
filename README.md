@@ -1,4 +1,4 @@
-[![CircleCI](https://circleci.com/gh/williamscs/tome.svg?style=svg)](https://circleci.com/gh/williamscs/tome)
+Build status: [![CircleCI](https://circleci.com/gh/williamscs/tome.svg?style=svg)](https://circleci.com/gh/williamscs/tome)
 
 # Tome
 
