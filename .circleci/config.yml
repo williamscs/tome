@@ -33,7 +33,7 @@ jobs:
             - node_modules
           key: v2-dependencies-{{ checksum "package.json" }}
         
-      - run: npm rebuild node-sass --force
+      - run: npm rebuild node-sass
       # run tests!
       - run: npm test -- --single-run
 
