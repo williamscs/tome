@@ -7,9 +7,9 @@ let keys: any;
 
 try {
   keys = require('./keyfile.json');
-
 } catch (e) {
-  console.log('Unable to load api keys. Saving to Drive will not be an option.')
+  keys = undefined;
+  console.log('Unable to load api keys. Saving to Drive will not be an option.');
 }
 
 
@@ -45,17 +45,19 @@ export class DriveService {
   }
 
   initClient() {
-    this.gapi.load('client:auth2', async () => {
-       await this.gapi.client.init({
-        apiKey: this.API_KEY,
-        clientId: this.CLIENT_ID,
-        discoveryDocs: this.DISCOVERY_DOCS,
-        scope: this.SCOPES
-      });
-      this.gapi.auth2.getAuthInstance().isSignedIn.listen(this.updateSigninStatus.bind(this));
+    if (keys) {
+      this.gapi.load('client:auth2', async () => {
+         await this.gapi.client.init({
+          apiKey: this.API_KEY,
+          clientId: this.CLIENT_ID,
+          discoveryDocs: this.DISCOVERY_DOCS,
+          scope: this.SCOPES
+        });
+        this.gapi.auth2.getAuthInstance().isSignedIn.listen(this.updateSigninStatus.bind(this));
 
-      this.updateSigninStatus(this.isSignedIn());
-    });
+        this.updateSigninStatus(this.isSignedIn());
+      });
+    }
   }
 
   updateSigninStatus(status: boolean) {
@@ -71,47 +73,51 @@ export class DriveService {
   }
 
   async retrieveSaveData() {
-    let data;
+    if (this.gapi && this.gapi.client) {
+      let data;
 
-    if (this.isSignedIn() && this.gapi.client) {
-      const fileId = await this.getFileId();
+      if (this.isSignedIn() && this.gapi.client) {
+        const fileId = await this.getFileId();
 
-      const fileResponse = await this.gapi.client.drive.files.get({
-        'fileId': fileId,
-        'alt': 'media'
-      });
+        const fileResponse = await this.gapi.client.drive.files.get({
+          'fileId': fileId,
+          'alt': 'media'
+        });
 
-      data = JSON.parse(fileResponse.body);
-    } else {
-      data = {};
+        data = JSON.parse(fileResponse.body);
+      } else {
+        data = {};
+      }
+
+      return data;
     }
-
-    return data;
   }
 
   async getFileId() {
-    const request = await this.gapi.client.drive.files.list({
-      'spaces': 'appDataFolder',
-      'q': 'name="tome-save.json"'
-    });
-    const files = request.result.files;
-    let fileId;
-    if (files.length === 1) {
-      fileId = request.result.files[0].id;
-    } else if (files.length === 0) {
-      const metadata = {
-        id: null,
-        name: 'tome-save.json',
-        mimeType: 'text/plain',
-        parents: ['appDataFolder'],
-        editable: true
-      };
-      const uploadRequest = await this.saveFile(metadata, '{}');
+    if (this.gapi && this.gapi.client) {
+      const request = await this.gapi.client.drive.files.list({
+        'spaces': 'appDataFolder',
+        'q': 'name="tome-save.json"'
+      });
+      const files = request.result.files;
+      let fileId;
+      if (files.length === 1) {
+        fileId = request.result.files[0].id;
+      } else if (files.length === 0) {
+        const metadata = {
+          id: null,
+          name: 'tome-save.json',
+          mimeType: 'text/plain',
+          parents: ['appDataFolder'],
+          editable: true
+        };
+        const uploadRequest = await this.saveFile(metadata, '{}');
 
-      fileId = uploadRequest.result.id;
+        fileId = uploadRequest.result.id;
+      }
+
+      return fileId;
     }
-
-    return fileId;
   }
 
   async saveFile(metadata, content) {
@@ -151,16 +157,20 @@ export class DriveService {
   }
 
   async signIn() {
-    await this.gapi.auth2.getAuthInstance().signIn();
-    this.updateSigninStatus(true);
+    if (this.gapi && this.gapi.auth2) {
+      await this.gapi.auth2.getAuthInstance().signIn();
+      this.updateSigninStatus(true);
+    }
   }
 
   async signOut() {
-    await this.gapi.auth2.getAuthInstance().signOut();
+    if (this.gapi && this.gapi.auth2) {
+      await this.gapi.auth2.getAuthInstance().signOut();
 
-    // Clear client data that we currently have.
-    // this.gapi.client = undefined;
-    this.updateSigninStatus(false);
+      // Clear client data that we currently have.
+      // this.gapi.client = undefined;
+      this.updateSigninStatus(false);
+    }
   }
 
 }

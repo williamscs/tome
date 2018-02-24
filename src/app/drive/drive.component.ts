@@ -15,7 +15,6 @@ export class DriveComponent implements OnInit {
 
   constructor(private driveService: DriveService) {
     this.driveService = driveService;
-    console.log(this.driveService.initClient);
 
     this.driveService.initClient();
   }
