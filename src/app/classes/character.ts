@@ -1,5 +1,7 @@
 import { Class } from './class.enum';
 
+import * as uuidv4 from 'uuid/v4';
+
 export class Character {
     id: number;
     name: string;
@@ -8,7 +10,7 @@ export class Character {
     class: Class;
 
     constructor() {
-        this.id = 1234;
+        this.id = uuidv4();
         this.name = '';
         this._level = 1;
         this.experience = 0;

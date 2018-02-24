@@ -2,6 +2,8 @@ import { Inject, Injectable } from '@angular/core';
 import { Subject } from 'rxjs/Subject';
 
 import {MultiPartBuilder} from './multipart';
+import { Character } from '../classes/character';
+import { Metadata } from './metadata';
 
 let keys: any;
 
@@ -44,7 +46,7 @@ export class DriveService {
     }
   }
 
-  initClient() {
+  initClient(): void {
     if (keys) {
       this.gapi.load('client:auth2', async () => {
          await this.gapi.client.init({
@@ -60,7 +62,7 @@ export class DriveService {
     }
   }
 
-  updateSigninStatus(status: boolean) {
+  updateSigninStatus(status: boolean): void {
     this.statusUpdatedSource.next(status);
   }
 
@@ -72,9 +74,9 @@ export class DriveService {
     }
   }
 
-  async retrieveSaveData() {
+  async retrieveSaveData(): Promise<Character> {
     if (this.gapi && this.gapi.client) {
-      let data;
+      let data: Character;
 
       if (this.isSignedIn() && this.gapi.client) {
         const fileId = await this.getFileId();
@@ -84,16 +86,27 @@ export class DriveService {
           'alt': 'media'
         });
 
-        data = JSON.parse(fileResponse.body);
+        const responseBody = JSON.parse(fileResponse.body);
+
+        data = new Character();
+        data.class = responseBody.class;
+        data.experience = responseBody.experience;
+        data.id = responseBody.id;
+        data.name = responseBody.name;
       } else {
-        data = {};
+        data = new Character();
       }
+
+      console.log(data);
 
       return data;
     }
   }
 
-  async getFileId() {
+  /**
+   * Retrieves the file ID by file name. If this file doesn't exist, create it.
+   */
+  async getFileId(): Promise<string> {
     if (this.gapi && this.gapi.client) {
       const request = await this.gapi.client.drive.files.list({
         'spaces': 'appDataFolder',
@@ -104,14 +117,7 @@ export class DriveService {
       if (files.length === 1) {
         fileId = request.result.files[0].id;
       } else if (files.length === 0) {
-        const metadata = {
-          id: null,
-          name: 'tome-save.json',
-          mimeType: 'text/plain',
-          parents: ['appDataFolder'],
-          editable: true
-        };
-        const uploadRequest = await this.saveFile(metadata, '{}');
+        const uploadRequest = await this.saveFile(new Metadata(), new Character());
 
         fileId = uploadRequest.result.id;
       }
@@ -120,7 +126,12 @@ export class DriveService {
     }
   }
 
-  async saveFile(metadata, content) {
+  /**
+   * Persist the data on the Google Drive platform.
+   * @param metadata Drive file metadata, such as id, name, etc.
+   * @param content Character JSON payload to be sent to the server.
+   */
+  async saveFile(metadata: Metadata, content: Character) {
       let path;
       let method;
 
@@ -134,7 +145,7 @@ export class DriveService {
 
       const multipart = new MultiPartBuilder()
         .append('application/json', JSON.stringify(metadata))
-        .append(metadata.mimeType, content)
+        .append(metadata.mimeType, JSON.stringify(content))
         .finish();
       try {
         const uploadRequest = await gapi.client.request({
@@ -156,14 +167,14 @@ export class DriveService {
       return null;
   }
 
-  async signIn() {
+  async signIn(): Promise<void> {
     if (this.gapi && this.gapi.auth2) {
       await this.gapi.auth2.getAuthInstance().signIn();
       this.updateSigninStatus(true);
     }
   }
 
-  async signOut() {
+  async signOut(): Promise<void> {
     if (this.gapi && this.gapi.auth2) {
       await this.gapi.auth2.getAuthInstance().signOut();
 
