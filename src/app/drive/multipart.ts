@@ -20,7 +20,7 @@ export class MultiPartBuilder {
    * @param {String} mimeType Content type of this part
    * @param {Blob|File|String} content Body of this part
    */
-  append (mimeType, content) {
+  append (mimeType: string, content: any) {
     if (this.body !== null) {
       throw new Error('Builder has already been finalized.');
     }

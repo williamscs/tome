@@ -37,7 +37,7 @@ export class DriveService {
   readonly SCOPES = 'https://www.googleapis.com/auth/drive.appdata';
   readonly  DEFAULT_FIELDS = 'id,name,mimeType,spaces';
 
-  constructor( @Inject('Window') private window: Window) {
+  constructor( @Inject('Window') private window: any) {
     this.gapi = window['gapi'];
 
     if (keys) {

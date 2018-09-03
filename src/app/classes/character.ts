@@ -1,16 +1,16 @@
 import { Class } from './class.enum';
 
-import * as uuidv4 from 'uuid/v4';
+import {v4 as uuid} from 'uuid';
 
 export class Character {
-    id: number;
+    id: string;
     name: string;
     private _level: number;
     experience: number;
     class: Class;
 
     constructor() {
-        this.id = uuidv4();
+        this.id = uuid();
         this.name = '';
         this._level = 1;
         this.experience = 0;
